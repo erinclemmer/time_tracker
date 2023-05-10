@@ -80,12 +80,9 @@ class TimeTrackerApp(tk.Tk):
         self.report_button = ttk.Button(self.report_frame, text="Show Report", command=self.generate_report)
         self.report_button.pack(side=tk.RIGHT, padx=(0, 10), pady=10)
 
-        # Save and Load buttons
+        # Save button
         self.save_data_button = ttk.Button(self.report_frame, text="Save Data", command=self.save_data)
         self.save_data_button.pack(side=tk.LEFT, padx=(10, 5), pady=10)
-
-        self.load_data_button = ttk.Button(self.report_frame, text="Load Data", command=self.load_data)
-        self.load_data_button.pack(side=tk.LEFT, padx=(5, 10), pady=10)
 
         self.load_data()
 
@@ -103,6 +100,8 @@ class TimeTrackerApp(tk.Tk):
 
         df = pd.read_csv("activities.csv")
         self.data = ActivityTracker.from_dataframe(df)
+        for k in self.data.activities.keys():
+            self.activities_list.insert("", tk.END, k, values=(k, self.data.activities[k].get_total_time()))
 
     def add_activity(self):
         activity_name = self.activity_entry.get()

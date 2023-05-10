@@ -11,6 +11,9 @@ def append_df(df, row):
 def str_to_datetime(d: str) -> datetime:
     return datetime.strptime(d, '%y-%m-%d %H:%M:%S.%f')
 
+def datetime_to_str(d: datetime) -> str:
+    return d.strftime('%y-%m-%d %H:%M:%S.%f')
+
 class ActivityInstance:
     start_time: datetime
     end_time: datetime
@@ -138,14 +141,13 @@ class ActivityTracker:
     
     def to_dataframe(self) -> pd.DataFrame:
         self.stop_timer()
-        df = pd.DataFrame(columns=["Activity", "Start", "End", "Duration"])
+        df = pd.DataFrame(columns=["Activity", "Start", "End"])
         for a in self.activities.values():
             for i in a.instances:
                 df = append_df(df, {
                     "Activity": a.name,
-                    "Start": str(i.start_time),
-                    "End": str(i.end_time),
-                    "Duration": str(i.duration)
+                    "Start": datetime_to_str(i.start_time),
+                    "End": datetime_to_str(i.end_time)
                 })
         
         return df
