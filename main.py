@@ -147,12 +147,19 @@ class TimeTrackerApp(tk.Tk):
         self.data.start_timer(activity_name)
         self.current_activity_label.config(text=activity_name)
         self.current_activity_time_label.config(text="0:00:00")
+        self.current_activity_colon.config(text=": ")
+
+    def reset_current_activity_label(self):
+        self.current_activity_label.config(text="")
+        self.current_activity_time_label.config(text="")
+        self.current_activity_colon.config(text="")
 
     def stop_timer(self):
         current_activity = self.data.get_current_activity()
         if self.data.stop_timer() is None:
             return
         self.activities_list.set(current_activity.name, "Time", current_activity.get_total_time())
+        self.reset_current_activity_label()
 
     def update_live_timer(self):
         current_time = self.data.get_current_time()
