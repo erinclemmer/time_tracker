@@ -150,48 +150,6 @@ class TimeTrackerApp(tk.Tk):
 
         self.after(1000, self.update_live_timer)
 
-    def generate_report(self):
-        report_window = tk.Toplevel(self)
-        report_window.title("Report")
-        report_window.geometry("800x600")
-
-        report_text = tk.Text(report_window, wrap=tk.WORD)
-        report_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-
-        now = datetime.now()
-        current_week_start = now - timedelta(days=now.weekday())
-        current_week_end = current_week_start + timedelta(days=6)
-        current_month_start = now.replace(day=1)
-        current_month_end = (now.replace(month=now.month % 12 + 1, day=1) - timedelta(days=1)).replace(day=1)
-
-        for activity_name, activity in self.activities.items():
-            report_text.insert(tk.END, f"Activity: {activity_name}\n")
-            for instance in activity["instances"]:
-                start_time = instance["start_time"]
-                end_time = instance["end_time"]
-                duration = instance["duration"]
-
-                if start_time is None or end_time is None or duration is None:
-                    continue
-
-                in_current_week = current_week_start <= start_time <= current_week_end
-                in_current_month = current_month_start <= start_time <= current_month_end
-                in_current_year = now.year == start_time.year
-
-                if in_current_week:
-                    report_text.insert(tk.END, f"  This week:\n")
-
-                if in_current_month:
-                    report_text.insert(tk.END, f"  This month:\n")
-
-                if in_current_year:
-                    report_text.insert(tk.END, f"  This year:\n")
-
-                report_text.insert(tk.END, f"    Start time: {start_time}\n")
-                report_text.insert(tk.END, f"    End time: {end_time}\n")
-                report_text.insert(tk.END, f"    Duration: {duration}\n")
-            report_text.insert(tk.END, "\n")
-
 if __name__ == "__main__":
     app = TimeTrackerApp()
     app.mainloop()
