@@ -16,7 +16,6 @@ class TimeTrackerApp(tk.Tk):
         self.geometry("1280x720")
 
         self.data = ActivityTracker()
-        self.time_data = pd.DataFrame(columns=["Activity", "Start", "End", "Duration"])
 
         self.add_activity_frame = ttk.Frame(self)
         self.add_activity_frame.pack(side=tk.TOP, fill=tk.X)
@@ -75,10 +74,6 @@ class TimeTrackerApp(tk.Tk):
 
         self.stop_timer_button = ttk.Button(self.activities_frame, text="Stop Timer", command=self.stop_timer)
         self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
-
-        # Report widgets
-        self.report_button = ttk.Button(self.report_frame, text="Show Report", command=self.generate_report)
-        self.report_button.pack(side=tk.RIGHT, padx=(0, 10), pady=10)
 
         # Save button
         self.save_data_button = ttk.Button(self.report_frame, text="Save Data", command=self.save_data)
@@ -196,36 +191,6 @@ class TimeTrackerApp(tk.Tk):
                 report_text.insert(tk.END, f"    End time: {end_time}\n")
                 report_text.insert(tk.END, f"    Duration: {duration}\n")
             report_text.insert(tk.END, "\n")
-
-    def display_report(self, container, timeframe):
-        now = datetime.now()
-
-        if timeframe == "W":
-            start_date = now - timedelta(days=now.weekday())
-            end_date = start_date + timedelta(days=6)
-        elif timeframe == "M":
-            start_date = now.replace(day=1)
-            end_date = now.replace(month=now.month+1, day=1) - timedelta(days=1)
-        elif timeframe == "Y":
-            start_date = now.replace(month=1, day=1)
-            end_date = now.replace(year=now.year+1, month=1, day=1) - timedelta(days=1)
-
-        filtered_data = self.time_data[(self.time_data["Start"] >= start_date) & (self.time_data["End"] <= end_date)]
-        report_data = filtered_data.groupby("Activity")["Duration"].sum().reset_index()
-        report_data["Duration"] = report_data["Duration"].apply(lambda x: str(x).split(".")[0])
-
-        report_list = ttk.Treeview(container)
-        report_list["columns"] = ("Activity", "Time")
-        report_list.column("#0", width=0, stretch=tk.NO)
-        report_list.column("Activity", anchor=tk.W, width=200)
-        report_list.column("Time", anchor=tk.W, width=150)
-        report_list.heading("Activity", text="Activity", anchor=tk.W)
-        report_list.heading("Time", text="Time", anchor=tk.W)
-
-        for index, row in report_data.iterrows():
-            report_list.insert("", tk.END, row["Activity"], values=(row["Activity"], row["Duration"]))
-
-        report_list.pack(expand=True, fill=tk.BOTH)
 
 if __name__ == "__main__":
     app = TimeTrackerApp()
