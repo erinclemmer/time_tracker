@@ -1,15 +1,22 @@
 from typing import List, Dict
 from datetime import datetime, timedelta
+import pandas as pd
 
 def pretty_time(d: timedelta) -> str:
     return str(d).split(".")[0]
+
+def append_df(df, row):
+    return pd.concat([df, pd.DataFrame.from_records([row])])   
+
+def str_to_datetime(d: str) -> datetime:
+    return datetime.strptime(d, '%y-%m-%d %H:%M:%S.%f')
 
 class ActivityInstance:
     start_time: datetime
     end_time: datetime
     duration: datetime
 
-    def __init__(self, start_time: datetime = None, end_time: datetime = None, duration: datetime = None):
+    def __init__(self, start_time: datetime = None, end_time: datetime = None, duration: timedelta = None):
         if start_time == None:
             self.start_time = datetime.now()
         else:
@@ -128,3 +135,33 @@ class ActivityTracker:
             return None
         self.current_activity = None
         return duration
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        self.stop_timer()
+        df = pd.DataFrame(columns=["Activity", "Start", "End", "Duration"])
+        for a in self.activities.values():
+            for i in a.instances:
+                df = append_df(df, {
+                    "Activity": a.name,
+                    "Start": str(i.start_time),
+                    "End": str(i.end_time),
+                    "Duration": str(i.duration)
+                })
+        
+        return df
+    
+    def from_dataframe(df: pd.DataFrame):
+        instances = { }
+        for _, row in df.iterrows():
+            name = row["Activity"]
+            if not name in instances:
+                instances[name] = [ ]
+            start = str_to_datetime(row["Start"])
+            end = str_to_datetime(row["End"])
+            duration = end - start
+            instances[name].append(ActivityInstance(start, end, duration))
+
+        activities = { }
+        for k in instances.keys():
+            activities[k] = Activity(k, instances[k])
+        return ActivityTracker(activities)

@@ -1,4 +1,5 @@
 import tkinter as tk
+import os
 from typing import List
 from tkinter import ttk, filedialog
 import time
@@ -6,9 +7,6 @@ from datetime import datetime, timedelta
 from dateutil import rrule
 from objects import Activity, ActivityInstance, ActivityTracker
 import pandas as pd
-
-def append_df(df, row):
-    return pd.concat([df, pd.DataFrame.from_records([row])])    
 
 class TimeTrackerApp(tk.Tk):
     def __init__(self):
@@ -89,32 +87,22 @@ class TimeTrackerApp(tk.Tk):
         self.load_data_button = ttk.Button(self.report_frame, text="Load Data", command=self.load_data)
         self.load_data_button.pack(side=tk.LEFT, padx=(5, 10), pady=10)
 
+        self.load_data()
+
         # Initialize the live timer update
         self.update_live_timer()
 
     def save_data(self):
-        if self.current_activity is not None:
-            self.stop_timer()
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")])
-        if file_path:
-            self.time_data.to_csv(file_path, index=False)
+        self.data.to_dataframe().to_csv("activities.csv", index=False)
+        print("Data Saved!")
 
     def load_data(self):
-        file_path = filedialog.askopenfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")])
-        if file_path:
-            self.time_data = pd.read_csv(file_path)
-            self.activities.clear()
-            self.activities_list.delete(*self.activities_list.get_children())
+        file_name = "activities.csv"
+        if not os.path.exists(file_name):
+            return
 
-            for index, row in self.time_data.iterrows():
-                activity_name = row["Activity"]
-                if activity_name not in self.activities:
-                    self.activities[activity_name] = {"start_time": None, "total_time": timedelta()}
-                    self.activities_list.insert("", tk.END, activity_name, values=(activity_name, "0:00:00"))
-
-                duration = pd.to_timedelta(row["Duration"]).to_pytimedelta()
-                self.activities[activity_name]["total_time"] += duration
-                self.activities_list.set(activity_name, "Time", str(self.activities[activity_name]["total_time"]).split(".")[0])
+        df = pd.read_csv("activities.csv")
+        self.data = ActivityTracker.from_dataframe(df)
 
     def add_activity(self):
         activity_name = self.activity_entry.get()
