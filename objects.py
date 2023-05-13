@@ -98,6 +98,14 @@ class Activity:
         if not self.currently_running():
             return None
         return self.get_last_instance().current_time()
+    
+    def get_hours_last_week(self) -> str:
+        last_week = datetime.now() - timedelta(days=7)
+        total_time = timedelta(days=0)
+        instances_last_week = [i for i in self.instances if i.start_time >= last_week]
+        for i in instances_last_week:
+            total_time += i.duration
+        return str(total_time)
         
 class ActivityTracker:
     current_activity: str

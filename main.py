@@ -87,6 +87,7 @@ class TimeTrackerApp(tk.Tk):
         self.stop_timer_button = ttk.Button(self.activities_frame, text="Stop Timer", command=self.stop_timer)
         self.activities_button = ttk.Button(self.activities_frame, text="Activities", command=self.show_activities_list)
         self.delete_instance_button = ttk.Button(self.activities_frame, text="Delete", command=self.delete_instance)
+        self.hours_last_week_label = ttk.Label(self.activities_frame, text="0:00")
 
         # Save button
         self.save_data_button = ttk.Button(self.report_frame, text="Save Data", command=self.save_data)
@@ -98,18 +99,17 @@ class TimeTrackerApp(tk.Tk):
         self.update_live_timer()
 
     def show_activities_list(self):
-        print("Showing activities list")
         self.data.unload_activity()
         self.instance_list.pack_forget()
         self.start_timer_button.pack_forget()
         self.stop_timer_button.pack_forget()
         self.activities_button.pack_forget()
         self.delete_instance_button.pack_forget()
+        self.hours_last_week_label.pack_forget()
         self.activities_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         self.reset_current_activity_label()
 
     def show_instance_list(self, event):
-        print("Showing inst list")
         selected_item = self.activities_list.selection()
         if len(selected_item) == 0:
             return
@@ -125,6 +125,8 @@ class TimeTrackerApp(tk.Tk):
         self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
         self.activities_button.pack(side=tk.TOP, pady=(5, 10))
         self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))
+        self.hours_last_week_label.pack(side=tk.TOP, pady=(5, 10))
+        self.hours_last_week_label.config(text=self.data.get_current_activity().get_hours_last_week())
 
         self.current_activity_label.config(text=activity_name)
         self.current_activity_time_label.config(text="0:00:00")
