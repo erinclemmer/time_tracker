@@ -43,6 +43,9 @@ class ActivityInstance:
         current_time = datetime.now()
         duration = current_time - self.start_time
         return pretty_time(duration)
+    
+    def to_string(self) -> str:
+        return datetime_to_str(self.start_time)
 
 class Activity:
     name: str
@@ -54,6 +57,21 @@ class Activity:
 
     def add_instance(self):
         self.instances.append(ActivityInstance())
+
+    def delete_instance(self, start_time: str) -> bool:
+        if start_time == None:
+            print("Delete Instance: No start time")
+            return False
+        instance = None
+        for i in self.instances:
+            if datetime_to_str(i.start_time) == start_time:
+                instance = i
+                break
+        if instance == None:
+            print(f"Delete Instance: could not find start time \"{start_time}\"")
+            return False
+        self.instances.remove(instance)
+        return True
 
     def get_last_instance(self) -> ActivityInstance | None:
         if len(self.instances) == 0:
@@ -120,14 +138,34 @@ class ActivityTracker:
             return None
         return self.get_current_activity().get_current_time()
     
+    def set_activity(self, name) -> bool:
+        if self.name_available(name):
+            print(f"Set Activity: Activity {name} not available")
+            return False
+        if self.timer_running():
+            print("Set Activity: Timer is currently running")
+            return False
+        if self.get_current_activity() != None:
+            print("Set Activity: Activity already set")
+            return False
+        self.current_activity = name
+        return True
+
+    def unload_activity(self) -> bool:
+        if self.get_current_activity() == None:
+            return
+        if self.timer_running():
+            self.stop_timer()
+        self.current_activity = None
+    
     def start_timer(self, name) -> bool:
         if self.name_available(name):
             return False
         if self.timer_running():
             self.stop_timer()
-        self.current_activity = name
-        activity: Activity = self.activities[name]
-        activity.add_instance()
+        if self.get_current_activity() == None:
+            return False
+        self.activities[name].add_instance()
 
     def stop_timer(self) -> timedelta | None:
         if not self.timer_running():

@@ -1,7 +1,7 @@
 import tkinter as tk
 import os
 from typing import List
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 import time
 from datetime import datetime, timedelta
 from dateutil import rrule
@@ -49,7 +49,6 @@ class TimeTrackerApp(tk.Tk):
         self.current_activity_label = ttk.Label(self.add_activity_frame, text="None selected")
         self.current_activity_label.pack(side=tk.RIGHT)
 
-
         # Create a style object and configure the row height
         style = ttk.Style()
         style.configure("Treeview", rowheight=40)
@@ -67,13 +66,27 @@ class TimeTrackerApp(tk.Tk):
         self.activities_list_scrollbar = ttk.Scrollbar(self.activities_frame, orient="vertical", command=self.activities_list.yview)
         self.activities_list.configure(yscrollcommand=self.activities_list_scrollbar.set)
         self.activities_list_scrollbar.pack(side=tk.LEFT, fill=tk.Y)
+        self.activities_list.bind("<<TreeviewSelect>>", self.show_instance_list)
+
+        # Instance list
+        self.instance_list = ttk.Treeview(self.activities_frame, style="Treeview")
+        self.instance_list["columns"] = ("Date", "Duration")
+        self.instance_list.column("#0", width=0, stretch=tk.NO)
+        self.instance_list.column("Date", anchor=tk.W, width=200)
+        self.instance_list.column("Duration", anchor=tk.W, width=150)
+        self.instance_list.heading("Date", text="Date", anchor=tk.W)
+        self.instance_list.heading("Duration", text="Duration", anchor=tk.W)
+        self.instance_list.pack_forget()
+
+        self.instance_list_scrollbar = ttk.Scrollbar(self.activities_frame, orient="vertical", command=self.instance_list.yview)
+        self.instance_list.configure(yscrollcommand=self.instance_list_scrollbar.set)
+        self.instance_list_scrollbar.pack_forget()
 
         # Timer control buttons
         self.start_timer_button = ttk.Button(self.activities_frame, text="Start Timer", command=self.start_timer)
-        self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
-
         self.stop_timer_button = ttk.Button(self.activities_frame, text="Stop Timer", command=self.stop_timer)
-        self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
+        self.activities_button = ttk.Button(self.activities_frame, text="Activities", command=self.show_activities_list)
+        self.delete_instance_button = ttk.Button(self.activities_frame, text="Delete", command=self.delete_instance)
 
         # Save button
         self.save_data_button = ttk.Button(self.report_frame, text="Save Data", command=self.save_data)
@@ -83,6 +96,52 @@ class TimeTrackerApp(tk.Tk):
 
         # Initialize the live timer update
         self.update_live_timer()
+
+    def show_activities_list(self):
+        print("Showing activities list")
+        self.data.unload_activity()
+        self.instance_list.pack_forget()
+        self.start_timer_button.pack_forget()
+        self.stop_timer_button.pack_forget()
+        self.activities_button.pack_forget()
+        self.delete_instance_button.pack_forget()
+        self.activities_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.reset_current_activity_label()
+
+    def show_instance_list(self, event):
+        print("Showing inst list")
+        selected_item = self.activities_list.selection()
+        if len(selected_item) == 0:
+            return
+        activity_name = selected_item[0]
+        if not self.data.set_activity(activity_name):
+            return
+        self.activities_list.pack_forget()
+        self.instance_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.instance_list.delete(*self.instance_list.get_children())
+        for i in self.data.get_current_activity().instances:
+            self.instance_list.insert("", tk.END, i.to_string(), values=(i.start_time, i.duration))
+        self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
+        self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
+        self.activities_button.pack(side=tk.TOP, pady=(5, 10))
+        self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))
+
+        self.current_activity_label.config(text=activity_name)
+        self.current_activity_time_label.config(text="0:00:00")
+        self.current_activity_colon.config(text=": ")
+
+    def delete_instance(self):
+        selected_item = self.instance_list.selection()
+        if len(selected_item) == 0:
+            print("Delete Instance: no selected item")
+            return
+        result = messagebox.askyesno("Delete Instance", "Are you sure?")
+        if not result:
+            return
+        if not self.data.get_current_activity().delete_instance(selected_item[0]):
+            return
+        self.show_activities_list()
+        self.show_instance_list(None)
 
     def save_data(self):
         self.data.to_dataframe().to_csv("activities.csv", index=False)
@@ -127,9 +186,6 @@ class TimeTrackerApp(tk.Tk):
         print("Starting timer")
         activity_name = selected_item[0]
         self.data.start_timer(activity_name)
-        self.current_activity_label.config(text=activity_name)
-        self.current_activity_time_label.config(text="0:00:00")
-        self.current_activity_colon.config(text=": ")
 
     def reset_current_activity_label(self):
         self.current_activity_label.config(text="")
@@ -141,7 +197,8 @@ class TimeTrackerApp(tk.Tk):
         if self.data.stop_timer() is None:
             return
         self.activities_list.set(current_activity.name, "Time", current_activity.get_total_time())
-        self.reset_current_activity_label()
+        self.current_activity_time_label.config(text="0:00:00")
+        self.current_activity_colon.config(text=": ")
         self.save_data()
 
     def update_live_timer(self):
