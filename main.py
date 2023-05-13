@@ -1,7 +1,7 @@
 import tkinter as tk
 import os
 from typing import List
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 import time
 from datetime import datetime, timedelta
 from dateutil import rrule
@@ -30,9 +30,6 @@ class TimeTrackerApp(tk.Tk):
 
     def create_widgets(self):
         # Add activity widgets
-        self.activity_entry = ttk.Entry(self.add_activity_frame)
-        self.activity_entry.pack(side=tk.LEFT, padx=(10, 5), pady=10)
-
         self.add_activity_button = ttk.Button(self.add_activity_frame, text="Add Activity", command=self.add_activity)
         self.add_activity_button.pack(side=tk.LEFT, padx=(0, 10))
 
@@ -144,6 +141,7 @@ class TimeTrackerApp(tk.Tk):
             return
         self.show_activities_list()
         self.show_instance_list(None)
+        self.save_data()
 
     def save_data(self):
         self.data.to_dataframe().to_csv("activities.csv", index=False)
@@ -160,20 +158,23 @@ class TimeTrackerApp(tk.Tk):
             self.activities_list.insert("", tk.END, k, values=(k, self.data.activities[k].get_total_time()))
 
     def add_activity(self):
-        activity_name = self.activity_entry.get()
+        activity_name = simpledialog.askstring("Activity Title", "What is the name of the activity?")
+        if activity_name == None or len(activity_name) == 0:
+            return
         if activity_name and self.data.name_available(activity_name):
             self.data.add_activity(activity_name)
             self.activities_list.insert("", tk.END, activity_name, values=(activity_name, "0:00:00"))
 
-            # Clear the text box after adding an activity
-            self.activity_entry.delete(0, tk.END)
-
     def remove_activity(self):
+        result = messagebox.askyesno("Remove Activity?", "Are you sure?")
+        if not result:
+            return
         selected_item = self.activities_list.selection()
         if selected_item:
             activity_name = selected_item[0]
             self.data.remove_activity(activity_name)
             self.activities_list.delete(activity_name)
+        self.save_data()
 
     def start_timer(self):
         if self.data.timer_running():
@@ -202,6 +203,8 @@ class TimeTrackerApp(tk.Tk):
         self.current_activity_time_label.config(text="0:00:00")
         self.current_activity_colon.config(text=": ")
         self.save_data()
+        self.show_activities_list()
+        self.show_instance_list(None)
 
     def update_live_timer(self):
         current_time = self.data.get_current_time()
