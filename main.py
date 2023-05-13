@@ -1,11 +1,8 @@
 import tkinter as tk
 import os
 from typing import List
-from tkinter import ttk, filedialog, messagebox, simpledialog
-import time
-from datetime import datetime, timedelta
-from dateutil import rrule
-from objects import Activity, ActivityInstance, ActivityTracker
+from tkinter import ttk, messagebox, simpledialog
+from objects import ActivityTracker
 import pandas as pd
 
 class TimeTrackerApp(tk.Tk):
