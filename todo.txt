@@ -1,0 +1,3 @@
+Save data whenever timer is stopped
+Show list of instances of activity
+Show hours per week over the last week

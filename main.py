@@ -142,6 +142,7 @@ class TimeTrackerApp(tk.Tk):
             return
         self.activities_list.set(current_activity.name, "Time", current_activity.get_total_time())
         self.reset_current_activity_label()
+        self.save_data()
 
     def update_live_timer(self):
         current_time = self.data.get_current_time()
