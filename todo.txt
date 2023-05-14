@@ -3,3 +3,4 @@
 // Show hours per week over the last week
 Manually add activity time
 When getting hours last week, start at the beginning of the day no matter what time it is.
+Show total hours in last week
