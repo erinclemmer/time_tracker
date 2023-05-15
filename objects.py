@@ -46,6 +46,9 @@ class ActivityInstance:
     
     def to_string(self) -> str:
         return datetime_to_str(self.start_time)
+    
+    def pretty_start_time(self) -> str:
+        return self.start_time.strftime('%y/%m/%d %H:%M')
 
 class Activity:
     name: str
@@ -107,6 +110,12 @@ class Activity:
         for i in instances_last_week:
             total_time += i.duration
         return total_time
+    
+    def get_sorted_instances(self) -> List[ActivityInstance]:
+        ret_val = self.instances
+        ret_val.sort(key=lambda i: i.start_time)
+        ret_val.reverse()
+        return ret_val
         
 class ActivityTracker:
     current_activity: str

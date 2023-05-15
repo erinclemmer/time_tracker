@@ -7,7 +7,7 @@ import pandas as pd
 
 def pretty_duration(d):
     split = str(d).split('.')[0].split(':')
-    return str(split[0]) + ':' + str(split[1])
+    return split[0] + ':' + split[1]
 
 class TimeTrackerApp(tk.Tk):
     def __init__(self):
@@ -117,9 +117,8 @@ class TimeTrackerApp(tk.Tk):
         self.activities_list.pack_forget()
         self.instance_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         self.instance_list.delete(*self.instance_list.get_children())
-        for i in self.data.get_current_activity().instances:
-            
-            self.instance_list.insert("", tk.END, i.to_string(), values=(i.start_time, pretty_duration(i.duration)))
+        for i in self.data.get_current_activity().get_sorted_instances():
+            self.instance_list.insert("", tk.END, i.to_string(), values=(i.pretty_start_time(), pretty_duration(i.duration)))
         self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
         self.activities_button.pack(side=tk.TOP, pady=(5, 10))
         self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))
