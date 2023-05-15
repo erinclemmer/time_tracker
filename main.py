@@ -121,7 +121,6 @@ class TimeTrackerApp(tk.Tk):
             
             self.instance_list.insert("", tk.END, i.to_string(), values=(i.start_time, pretty_duration(i.duration)))
         self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
-        self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
         self.activities_button.pack(side=tk.TOP, pady=(5, 10))
         self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))
         self.hours_last_week_label.pack(side=tk.TOP, pady=(5, 10))
@@ -187,6 +186,8 @@ class TimeTrackerApp(tk.Tk):
         if not selected_item:
             print("No currently selected item")
             return
+        self.start_timer_button.pack_forget()
+        self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
         
         print("Starting timer")
         activity_name = selected_item[0]
@@ -201,6 +202,8 @@ class TimeTrackerApp(tk.Tk):
         current_activity = self.data.get_current_activity()
         if self.data.stop_timer() is None:
             return
+        self.stop_timer_button.pack_forget()
+        self.start_timer_button.pack(side=tk.TOP, pady=(5, 10))
         self.activities_list.set(current_activity.name, "Time", current_activity.get_total_time())
         self.current_activity_time_label.config(text="0:00:00")
         self.current_activity_colon.config(text=": ")
