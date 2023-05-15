@@ -17,7 +17,7 @@ def datetime_to_str(d: datetime) -> str:
 class ActivityInstance:
     start_time: datetime
     end_time: datetime
-    duration: datetime
+    duration: timedelta
 
     def __init__(self, start_time: datetime = None, end_time: datetime = None, duration: timedelta = None):
         if start_time == None:
@@ -99,14 +99,14 @@ class Activity:
             return None
         return self.get_last_instance().current_time()
     
-    def get_hours_last_week(self) -> str:
+    def get_hours_last_week(self) -> timedelta:
         now = datetime.now()
         last_week = now - timedelta(days=7, hours=now.hour, minutes=now.minute)
         total_time = timedelta(days=0)
         instances_last_week = [i for i in self.instances if i.start_time >= last_week]
         for i in instances_last_week:
             total_time += i.duration
-        return str(total_time)
+        return total_time
         
 class ActivityTracker:
     current_activity: str

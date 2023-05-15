@@ -5,6 +5,10 @@ from tkinter import ttk, messagebox, simpledialog
 from objects import ActivityTracker
 import pandas as pd
 
+def pretty_duration(d):
+    split = str(d).split('.')[0].split(':')
+    return str(split[0]) + ':' + str(split[1])
+
 class TimeTrackerApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -114,13 +118,14 @@ class TimeTrackerApp(tk.Tk):
         self.instance_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         self.instance_list.delete(*self.instance_list.get_children())
         for i in self.data.get_current_activity().instances:
-            self.instance_list.insert("", tk.END, i.to_string(), values=(i.start_time, i.duration))
+            
+            self.instance_list.insert("", tk.END, i.to_string(), values=(i.start_time, pretty_duration(i.duration)))
         self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
         self.stop_timer_button.pack(side=tk.TOP, pady=(5, 10))
         self.activities_button.pack(side=tk.TOP, pady=(5, 10))
         self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))
         self.hours_last_week_label.pack(side=tk.TOP, pady=(5, 10))
-        self.hours_last_week_label.config(text=self.data.get_current_activity().get_hours_last_week())
+        self.hours_last_week_label.config(text='7 Day: ' + pretty_duration(self.data.get_current_activity().get_hours_last_week()))
 
         self.current_activity_label.config(text=activity_name)
         self.current_activity_time_label.config(text="0:00:00")
@@ -152,7 +157,7 @@ class TimeTrackerApp(tk.Tk):
         df = pd.read_csv("activities.csv")
         self.data = ActivityTracker.from_dataframe(df)
         for k in self.data.activities.keys():
-            self.activities_list.insert("", tk.END, k, values=(k, self.data.activities[k].get_total_time()))
+            self.activities_list.insert("", tk.END, k, values=(k, pretty_duration(self.data.activities[k].get_total_time())))
 
     def add_activity(self):
         activity_name = simpledialog.askstring("Activity Title", "What is the name of the activity?")
