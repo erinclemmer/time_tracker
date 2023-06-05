@@ -104,7 +104,7 @@ class Activity:
     
     def get_hours_last_week(self) -> timedelta:
         now = datetime.now()
-        last_week = now - timedelta(days=7, hours=now.hour, minutes=now.minute)
+        last_week = now - timedelta(days=6, hours=now.hour, minutes=now.minute)
         total_time = timedelta(days=0)
         instances_last_week = [i for i in self.instances if i.start_time >= last_week]
         for i in instances_last_week:
