@@ -5,3 +5,4 @@
 // Show total hours in last week
 // Only show the stop or stop timer button
 // sort activity instances from most recent to least recent
+Create a server to sync times across devices
