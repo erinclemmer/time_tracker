@@ -1,9 +1,18 @@
 import tkinter as tk
+import json
 import os
+import requests
 from typing import List
 from tkinter import ttk, messagebox, simpledialog
 from objects import ActivityTracker
 import pandas as pd
+
+config = {}
+if not os.path.exists('config.json'):
+    raise Exception('config.json not found')
+
+with open('config.json', 'r', encoding='utf-8') as f:
+    config = json.loads(f.read())
 
 def pretty_duration(d):
     split = str(d).split('.')[0].split(':')
@@ -147,11 +156,50 @@ class TimeTrackerApp(tk.Tk):
         self.data.to_dataframe().to_csv("activities.csv", index=False)
         print("Data Saved!")
 
+    def get_data_from_server(self):
+        if 'server' not in config or 'server_port' not in config:
+            print('Server or server port not in config file, reading locally')
+            return None
+        ip = config['server']
+        port = config['server_port']
+        res = requests.get(f'http://{ip}:{port}')
+        if res.status_code != 200:
+            print(f'Server responded with {res.status_code}, {res.content.decode()}')
+            return None
+        data = res.content.decode()
+        print('Loaded data from server, writing activities file')
+        if len(data) > 0:
+            with open('activities.csv', 'w', encoding='utf-8') as f:
+                f.write(data)
+        return data
+
+    def sync_data(self):
+        if 'server' not in config or 'server_port' not in config:
+            print('Server or server port not in config file, reading locally')
+            return None
+        if 'password' not in config:
+            print('Password not in config')
+            return None
+        ip = config['server']
+        port = config['server_port']
+        f = open('activities.csv', 'r', encoding='utf-8')
+        data = f.read()
+        f.close()
+        res = requests.post(f'http://{ip}:{port}/sync', json={
+            "password": config['password'],
+            "data": data
+        })
+        if res.status_code != 200:
+            print(f'Server responded with {res.status_code}, {res.content.decode()}')
+            return None
+        print('Data Synced to server')
+
     def load_data(self):
+        self.get_data_from_server()
+
         file_name = "activities.csv"
         if not os.path.exists(file_name):
             return
-
         df = pd.read_csv("activities.csv")
         self.data = ActivityTracker.from_dataframe(df)
         for k in self.data.activities.keys():
@@ -207,6 +255,7 @@ class TimeTrackerApp(tk.Tk):
         self.current_activity_time_label.config(text="0:00:00")
         self.current_activity_colon.config(text=": ")
         self.save_data()
+        self.sync_data()
         self.show_activities_list()
         self.show_instance_list(None)
 
