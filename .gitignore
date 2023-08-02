@@ -3,3 +3,4 @@ instances.csv
 env/
 __pycache__/
 config.json
+server_output.log
