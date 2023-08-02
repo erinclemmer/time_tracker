@@ -25,14 +25,10 @@ def sync_activities(row: str):
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        ret_data = ''
-        if os.path.exists(current_file):
-            with open(current_file, 'r', encoding='utf-8') as f:
-                    ret_data = f.read()
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        self.wfile.write(ret_data.encode())
+        self.wfile.write('success'.encode())
 
     def do_POST(self):
         err = False
@@ -43,6 +39,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             if post_data['password'] != config['password']:
                 ret_data = 'Unauthorized'
                 raise Exception('Unauthorized')
+            if self.path =='/retrieve':
+                ret_data = ''
+                if os.path.exists(current_file):
+                    with open(current_file, 'r', encoding='utf-8') as f:
+                            ret_data = f.read()
+                else:
+                    ret_data = 'File does not exist'
+                    raise Exception('File not found')
             if self.path == '/sync':
                 ret_data = 'synced'
                 sync_activities(post_data['data'])

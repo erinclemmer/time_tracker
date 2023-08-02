@@ -162,7 +162,9 @@ class TimeTrackerApp(tk.Tk):
             return None
         ip = config['server']
         port = config['server_port']
-        res = requests.get(f'http://{ip}:{port}')
+        res = requests.post(f'http://{ip}:{port}/retrieve', json={
+            "password": config['password']    
+        })
         if res.status_code != 200:
             print(f'Server responded with {res.status_code}, {res.content.decode()}')
             return None
