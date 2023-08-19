@@ -77,11 +77,15 @@ class TimeTrackerApp(tk.Tk):
 
         # Instance list
         self.instance_list = ttk.Treeview(self.activities_frame, style="Treeview")
-        self.instance_list["columns"] = ("Date", "Duration")
+        self.instance_list["columns"] = ("Date", "start_time", "stop_time", "Duration")
         self.instance_list.column("#0", width=0, stretch=tk.NO)
-        self.instance_list.column("Date", anchor=tk.W, width=200)
-        self.instance_list.column("Duration", anchor=tk.W, width=150)
+        self.instance_list.column("Date", anchor=tk.W, width=100)
+        self.instance_list.column("start_time", anchor=tk.W, width=75)
+        self.instance_list.column("stop_time", anchor=tk.W, width=75)
+        self.instance_list.column("Duration", anchor=tk.W, width=100)
         self.instance_list.heading("Date", text="Date", anchor=tk.W)
+        self.instance_list.heading("start_time", text="Start Time", anchor=tk.W)
+        self.instance_list.heading("stop_time", text="Stop Time", anchor=tk.W)
         self.instance_list.heading("Duration", text="Duration", anchor=tk.W)
         self.instance_list.pack_forget()
 
@@ -127,7 +131,7 @@ class TimeTrackerApp(tk.Tk):
         self.instance_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         self.instance_list.delete(*self.instance_list.get_children())
         for i in self.data.get_current_activity().get_sorted_instances():
-            self.instance_list.insert("", tk.END, i.to_string(), values=(i.pretty_start_time(), pretty_duration(i.duration)))
+            self.instance_list.insert("", tk.END, i.to_string(), values=(i.pretty_date(), i.pretty_start_time(), i.pretty_stop_time(), pretty_duration(i.duration)))
         self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
         self.activities_button.pack(side=tk.TOP, pady=(5, 10))
         self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))

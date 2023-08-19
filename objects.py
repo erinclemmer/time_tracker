@@ -48,7 +48,16 @@ class ActivityInstance:
         return datetime_to_str(self.start_time)
     
     def pretty_start_time(self) -> str:
-        return self.start_time.strftime('%y/%m/%d %H:%M')
+        return self.pretty_time(self.start_time)
+
+    def pretty_stop_time(self) -> str:
+        return self.pretty_time(self.end_time)
+
+    def pretty_date(self) -> str:
+        return self.start_time.strftime('%y/%m/%d')
+
+    def pretty_time(self, t) -> str:
+        return t.strftime('%H:%M')
 
 class Activity:
     name: str
