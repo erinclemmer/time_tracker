@@ -1,18 +1,7 @@
 from typing import List, Dict
 from datetime import datetime, timedelta
 import pandas as pd
-
-def pretty_time(d: timedelta) -> str:
-    return str(d).split(".")[0]
-
-def append_df(df, row):
-    return pd.concat([df, pd.DataFrame.from_records([row])])   
-
-def str_to_datetime(d: str) -> datetime:
-    return datetime.strptime(d, '%y-%m-%d %H:%M:%S.%f')
-
-def datetime_to_str(d: datetime) -> str:
-    return d.strftime('%y-%m-%d %H:%M:%S.%f')
+from util import pretty_time, append_df, str_to_datetime, datetime_to_str
 
 class ActivityInstance:
     start_time: datetime
@@ -68,7 +57,9 @@ class Activity:
         self.instances = instances
 
     def add_instance(self):
-        self.instances.append(ActivityInstance())
+        instance = ActivityInstance()
+        self.instances.append(instance)
+        return instance
 
     def delete_instance(self, start_time: str) -> bool:
         if start_time == None:

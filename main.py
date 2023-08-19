@@ -2,10 +2,13 @@ import tkinter as tk
 import json
 import os
 import requests
+from datetime import datetime
 from typing import List
 from tkinter import ttk, messagebox, simpledialog
 from objects import ActivityTracker
 import pandas as pd
+
+from util import pretty_duration, get_number, str_to_datetime, datetime_to_str, ask_time
 
 config = {}
 if not os.path.exists('config.json'):
@@ -13,10 +16,6 @@ if not os.path.exists('config.json'):
 
 with open('config.json', 'r', encoding='utf-8') as f:
     config = json.loads(f.read())
-
-def pretty_duration(d):
-    split = str(d).split('.')[0].split(':')
-    return split[0] + ':' + split[1]
 
 class TimeTrackerApp(tk.Tk):
     def __init__(self):
@@ -99,6 +98,7 @@ class TimeTrackerApp(tk.Tk):
         self.start_timer_button = ttk.Button(self.activities_frame, text="Start Timer", command=self.start_timer)
         self.stop_timer_button = ttk.Button(self.activities_frame, text="Stop Timer", command=self.stop_timer)
         self.activities_button = ttk.Button(self.activities_frame, text="Activities", command=self.show_activities_list)
+        self.add_instance_button = ttk.Button(self.activities_frame, text="Add Instance", command=self.add_manual_instance)
         self.delete_instance_button = ttk.Button(self.activities_frame, text="Delete", command=self.delete_instance)
         self.hours_last_week_label = ttk.Label(self.activities_frame, text="0:00")
 
@@ -117,6 +117,7 @@ class TimeTrackerApp(tk.Tk):
         self.start_timer_button.pack_forget()
         self.stop_timer_button.pack_forget()
         self.activities_button.pack_forget()
+        self.add_instance_button.pack_forget()
         self.delete_instance_button.pack_forget()
         self.hours_last_week_label.pack_forget()
         self.activities_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -137,6 +138,7 @@ class TimeTrackerApp(tk.Tk):
         self.start_timer_button.pack(side=tk.TOP, pady=(10, 5))
         self.activities_button.pack(side=tk.TOP, pady=(5, 10))
         self.delete_instance_button.pack(side=tk.TOP, pady=(5, 10))
+        self.add_instance_button.pack(side=tk.TOP, pady=(5, 10))
         self.hours_last_week_label.pack(side=tk.TOP, pady=(5, 10))
         self.hours_last_week_label.config(text='7 Day: ' + pretty_duration(self.data.get_current_activity().get_hours_last_week()))
 
@@ -235,6 +237,7 @@ class TimeTrackerApp(tk.Tk):
             self.data.remove_activity(activity_name)
             self.activities_list.delete(activity_name)
         self.save_data()
+        self.sync_data()
 
     def start_timer(self):
         if self.data.timer_running():
@@ -251,6 +254,23 @@ class TimeTrackerApp(tk.Tk):
         print("Starting timer")
         activity_name = selected_item[0]
         self.data.start_timer(activity_name)
+
+    def add_manual_instance(self):
+        start_time = ask_time('Start Time')
+        if start_time is None:
+            return
+        end_time = ask_time('End Time')
+        if end_time is None:
+            return
+
+        instance = self.data.get_current_activity().add_instance()
+        instance.start_time = start_time
+        instance.end_time = end_time
+        instance.duration = end_time - start_time
+        self.save_data()
+        self.sync_data()
+        self.show_activities_list()
+        self.show_instance_list(None)
 
     def reset_current_activity_label(self):
         self.current_activity_label.config(text="")

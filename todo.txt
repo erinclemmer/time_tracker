@@ -7,5 +7,5 @@
 // sort activity instances from most recent to least recent
 // Create a server to sync times across devices
 // Show time ranges for activities
-Show times since last week on activity list
-Ability to manually add activity of specific time and length
+// Show times since last week on activity list
+// Ability to manually add activity of specific time and length
