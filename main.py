@@ -62,11 +62,13 @@ class TimeTrackerApp(tk.Tk):
 
         # Activities list
         self.activities_list = ttk.Treeview(self.activities_frame, style="Treeview")
-        self.activities_list["columns"] = ("Activity", "Time")
+        self.activities_list["columns"] = ("Activity", "Time", "7_Day")
         self.activities_list.column("#0", width=0, stretch=tk.NO)
-        self.activities_list.column("Activity", anchor=tk.W, width=200)
-        self.activities_list.column("Time", anchor=tk.W, width=150)
+        self.activities_list.column("Activity", anchor=tk.W, width=150)
+        self.activities_list.column("Time", anchor=tk.W, width=100)
+        self.activities_list.column("7_Day", anchor=tk.W, width=100)
         self.activities_list.heading("Activity", text="Activity", anchor=tk.W)
+        self.activities_list.heading("7_Day", text="7 Day", anchor=tk.W)
         self.activities_list.heading("Time", text="Time", anchor=tk.W)
         self.activities_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -209,7 +211,11 @@ class TimeTrackerApp(tk.Tk):
         df = pd.read_csv("activities.csv")
         self.data = ActivityTracker.from_dataframe(df)
         for k in self.data.activities.keys():
-            self.activities_list.insert("", tk.END, k, values=(k, pretty_duration(self.data.activities[k].get_total_time())))
+            self.activities_list.insert("", tk.END, k, values=(
+                k, 
+                pretty_duration(self.data.activities[k].get_total_time()), 
+                pretty_duration(self.data.activities[k].get_hours_last_week())
+            ))
 
     def add_activity(self):
         activity_name = simpledialog.askstring("Activity Title", "What is the name of the activity?")
