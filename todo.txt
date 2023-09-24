@@ -9,3 +9,5 @@
 // Show time ranges for activities
 // Show times since last week on activity list
 // Ability to manually add activity of specific time and length
+
+Create a report of all the things that I did for the last week or month
