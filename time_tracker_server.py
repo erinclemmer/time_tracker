@@ -3,13 +3,6 @@ import sys
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# TODO
-# Add auto backup capability, only hold 30 days of data and create new files for each month
-# // GET / returns current months data
-# Every day the old data is added to the month backup
-# // POST /add-activity adds a new line of data to the csv
-# POST /remove-activity removes a line of data from current month that matches it's exact start date
-
 config = {}
 if not os.path.exists('config.json'):
     raise Exception('config.json not found')
